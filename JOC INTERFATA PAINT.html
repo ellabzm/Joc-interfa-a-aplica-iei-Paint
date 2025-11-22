@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joc Interactiv: Interfața Paint</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .header h1 {
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            max-width: 600px;
+        }
+        
+        #joc-container {
+            width: 800px;
+            margin: 20px auto;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            background-color: white;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        #imagine-paint {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        #intrebare {
+            font-size: 1.5em;
+            margin: 15px 0;
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+            padding: 0 10px;
+        }
+        
+        .feedback {
+            font-size: 1.2em;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            max-width: 800px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .corect {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .gresit {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .zona-interactiva {
+            position: absolute;
+            cursor: pointer;
+            background-color: rgba(255, 255, 0, 0);
+            border: 2px dashed rgba(0, 0, 0, 0);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .zona-interactiva:hover {
+            background-color: rgba(52, 152, 219, 0.2);
+            border: 2px dashed #3498db;
+        }
+        
+        #scor {
+            font-size: 1.3em;
+            margin: 15px 0;
+            color: #2c3e50;
+            font-weight: bold;
+            background-color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .start-button {
+            padding: 12px 30px;
+            font-size: 1.3em;
+            cursor: pointer;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            margin: 20px 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+            background: linear-gradient(to right, #2980b9, #3498db);
+        }
+        
+        .zona-vizuala {
+            position: absolute;
+            z-index: 5;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        
+        .progress-bar {
+            width: 800px;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .instructions {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            max-width: 800px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            color: #2c3e50;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .final-score {
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 20px auto;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .final-score h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .score-value {
+            font-size: 3em;
+            font-weight: bold;
+            color: #3498db;
+            margin: 20px 0;
+        }
+        
+        .performance {
+            font-size: 1.2em;
+            margin: 15px 0;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 850px) {
+            #joc-container, .progress-bar, .instructions {
+                width: 95%;
+                max-width: 95%;
+            }
+            
+            #intrebare {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Joc Interactiv: Interfața Paint</h1>
+        <p>Testează-ți cunoștințele despre interfața Microsoft Paint identificând componentele ei!</p>
+    </div>
+    
+    <div class="instructions">
+        <h3>Cum să joci:</h3>
+        <ul>
+            <li>Fiecare rundă, vei fi întrebat să identifici o componentă specifică a interfeței Paint</li>
+            <li>Fă clic pe zona corespunzătoare din imagine</li>
+            <li>Primești feedback imediat pentru fiecare răspuns</li>
+            <li>Scorul tău se actualizează după fiecare întrebare</li>
+            <li>La final, vei vedea performanța ta generală</li>
+        </ul>
+    </div>
+
+    <button id="startButton" class="start-button">Începe Jocul!</button>
+    
+    <div id="intrebare" style="display: none;"></div>
+    
+    <div class="progress-bar">
+        <div class="progress" id="progressBar"></div>
+    </div>
+    
+    <div id="joc-container" style="display: none;">
+        <img id="imagine-paint" src="interfata_Paint.png" alt="Interfața Microsoft Paint">
+    </div>
+    
+    <div id="feedback" class="feedback"></div>
+    <div id="scor">Scor: 0 / 0</div>
+
+    <script>
+        // --- 1. CONFIGURAREA JOCULUI ---
+        // Coordonatele sunt relative la o imagine de referință de 800x500px
+       const componente = [
+    { nume: "Bara de titlu", top: 0, left: 115, width: 685, height: 30 },
+    { nume: "Bara de acces rapid", top: 0, left: 0, width: 115, height: 30 },
+    { nume: "Bara de meniuri", top: 35, left: 0, width: 800, height: 25 },
+    { nume: "Panglica cu Instrumente", top: 65, left: 0, width: 800, height: 63 },
+    { nume: "Zona de lucru (Pânză)", top: 130, left: 0, width: 800, height: 335 },
+    { nume: "Bara de stare", top: 470, left: 0, width: 800, height: 40 }
+];
+
+        let indexIntrebareCurenta = 0;
+        let scorCorect = 0;
+        let scorTotal = 0;
+        let raspunsActiv = false;
+        let ordineIntrebari = [];
+        let componentaIntrebata = null;
+
+        const container = document.getElementById('joc-container');
+        const intrebareElement = document.getElementById('intrebare');
+        const feedbackElement = document.getElementById('feedback');
+        const scorElement = document.getElementById('scor');
+        const startButton = document.getElementById('startButton');
+        const progressBar = document.getElementById('progressBar');
+
+        // --- 2. LOGICA JOCULUI ---
+        
+        // Funcția de scalare ajustează coordonatele la dimensiunea reală a containerului
+       // Funcția de scalare pentru lățime
+function scaleCoords(val) {
+    return val; // Nu mai este nevoie de scalare pentru că coordonatele sunt exacte
+}
+
+// Funcția de scalare pentru înălțime
+function scaleHeight(val) {
+    return val; // Nu mai este nevoie de scalare
+}
+        
+        function incarcaIntrebare() {
+            if (indexIntrebareCurenta >= componente.length) {
+                terminaJocul();
+                return;
+            }
+
+            // Folosește indexul amestecat pentru a găsi componenta
+            const indexComponentaReala = ordineIntrebari[indexIntrebareCurenta];
+            componentaIntrebata = componente[indexComponentaReala]; // Salvează global
+
+            intrebareElement.innerHTML = `Unde se află <strong>${componentaIntrebata.nume}</strong>? Fă clic pe zona corespunzătoare!`;
+            feedbackElement.style.display = 'none';
+            container.querySelectorAll('.zona-interactiva').forEach(el => el.remove());
+            container.querySelectorAll('.zona-vizuala').forEach(el => el.remove());
+            raspunsActiv = true;
+            
+            // Actualizează bara de progres
+            progressBar.style.width = `${((indexIntrebareCurenta + 1) / componente.length) * 100}%`;
+            
+            // Generarea zonelor interactive (overlay-uri transparente)
+            componente.forEach(comp => {
+                const zona = document.createElement('div');
+                zona.classList.add('zona-interactiva');
+                zona.style.top = scaleHeight(comp.top) + 'px';
+                zona.style.left = scaleCoords(comp.left) + 'px';
+                zona.style.width = scaleCoords(comp.width) + 'px';
+                zona.style.height = scaleHeight(comp.height) + 'px';
+
+                zona.dataset.nume = comp.nume;
+                zona.addEventListener('click', gestioneazaRaspuns);
+                container.appendChild(zona);
+            });
+        }
+        
+        function gestioneazaRaspuns(event) {
+            if (!raspunsActiv) return;
+
+            raspunsActiv = false; // Dezactivează alte click-uri până la următoarea întrebare
+            scorTotal++;
+            
+            const raspunsElev = event.target.dataset.nume;
+
+            // Folosește variabila globală, care este setată în incarcaIntrebare()
+            if (raspunsElev === componentaIntrebata.nume) { 
+                // Răspuns Corect
+                scorCorect++;
+                afiseazaFeedback(true, `⭐ Bravo! Ai identificat corect <strong>${componentaIntrebata.nume}</strong>.`);
+                marcheazaZona(componentaIntrebata, '#2ecc71');
+            } else {
+                // Răspuns Greșit
+                afiseazaFeedback(false, `Ai greșit. Ai ales <strong>${raspunsElev}</strong>, dar răspunsul corect era <strong>${componentaIntrebata.nume}</strong>.`);
+                marcheazaZona(componentaIntrebata, '#e74c3c'); // Marchează răspunsul corect
+                
+                // Marchează și zona greșită selectată
+                const zonaGresita = componente.find(comp => comp.nume === raspunsElev);
+                if (zonaGresita) {
+                    marcheazaZona(zonaGresita, '#f39c12');
+                }
+            }
+            
+            actualizeazaScor();
+            indexIntrebareCurenta++;
+
+            setTimeout(incarcaIntrebare, 3000); // Trecere la următoarea întrebare după 3 secunde
+        }
+
+        function afiseazaFeedback(corect, mesaj) {
+            feedbackElement.innerHTML = mesaj;
+            feedbackElement.className = corect ? 'feedback corect' : 'feedback gresit';
+            feedbackElement.style.display = 'block';
+        }
+        
+        function marcheazaZona(comp, culoare) {
+            const zonaVizuala = document.createElement('div');
+            zonaVizuala.classList.add('zona-vizuala');
+            zonaVizuala.style.top = scaleHeight(comp.top) + 'px';
+            zonaVizuala.style.left = scaleCoords(comp.left) + 'px';
+            zonaVizuala.style.width = scaleCoords(comp.width) + 'px';
+            zonaVizuala.style.height = scaleHeight(comp.height) + 'px';
+            zonaVizuala.style.backgroundColor = culoare;
+            zonaVizuala.style.opacity = '0.5';
+            zonaVizuala.style.border = `2px solid ${culoare}`;
+            container.appendChild(zonaVizuala);
+        }
+
+        function actualizeazaScor() {
+            scorElement.innerText = `Scor: ${scorCorect} / ${scorTotal}`;
+        }
+
+        function terminaJocul() {
+            const procentaj = Math.round((scorCorect / scorTotal) * 100);
+            let performanta = "";
+            
+            if (procentaj >= 90) performanta = "Excelent! Ești un expert al interfeței Paint!";
+            else if (procentaj >= 70) performanta = "Foarte bine! Cunoști bine interfața Paint.";
+            else if (procentaj >= 50) performanta = "Felicitări! Mai ai de exersat puțin.";
+            else performanta = "POȚI MAI MULT! Mai exersează!";
+            
+            document.body.innerHTML = `
+                <div class="header">
+                    <h1>Joc Finalizat!</h1>
+                </div>
+                
+                <div class="final-score">
+                    <h2>Rezultatul tău</h2>
+                    <div class="score-value">${scorCorect}/${scorTotal}</div>
+                    <div class="performance">${performanta}</div>
+                    <button id="restartButton" class="start-button">Joacă din nou</button>
+                </div>
+            `;
+            
+            document.getElementById('restartButton').addEventListener('click', function() {
+                location.reload();
+            });
+        }
+        
+        function pornesteJocul() {
+            indexIntrebareCurenta = 0;
+            scorCorect = 0;
+            scorTotal = 0;
+            
+            // Crearea și amestecarea indexurilor
+            ordineIntrebari = [];
+            for (let i = 0; i < componente.length; i++) {
+                ordineIntrebari.push(i);
+            }
+            // Amestecă array-ul de indexuri o singură dată
+            ordineIntrebari.sort(() => Math.random() - 0.5); 
+            
+            actualizeazaScor();
+            feedbackElement.style.display = 'none';
+            startButton.style.display = 'none';
+            document.querySelector('.instructions').style.display = 'none';
+            intrebareElement.style.display = 'block';
+            container.style.display = 'block';
+            progressBar.style.width = '0%';
+            
+            incarcaIntrebare();
+        }
+        
+        // --- 3. INIȚIALIZARE ---
+        document.addEventListener('DOMContentLoaded', () => {
+            container.style.height = '500px'; // Setează înălțimea containerului
+            
+            // Verifică dacă imaginea există
+            const img = document.getElementById('imagine-paint');
+            img.onerror = function() {
+                intrebareElement.innerHTML = "⚠️ <strong>ATENȚIE:</strong> Imaginea 'interfata_Paint.png' nu a fost găsită. Asigură-te că fișierul există în același folder cu acest fișier HTML!";
+                intrebareElement.style.display = 'block';
+                startButton.style.display = 'none';
+            };
+        });
+
+        startButton.addEventListener('click', pornesteJocul);
+
+    </script>
+
+</body>
+</html>
